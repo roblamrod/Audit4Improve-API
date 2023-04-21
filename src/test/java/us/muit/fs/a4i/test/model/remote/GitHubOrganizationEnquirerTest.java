@@ -3,8 +3,11 @@
  */
 package us.muit.fs.a4i.test.model.remote;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -12,6 +15,7 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHRepositoryStatistics;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GHRepositoryStatistics.CodeFrequency;
+import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHOrganization;
 
 import us.muit.fs.a4i.exceptions.MetricException;
@@ -22,6 +26,7 @@ import us.muit.fs.a4i.model.entities.ReportItem;
 import us.muit.fs.a4i.model.entities.ReportItemI;
 import us.muit.fs.a4i.model.entities.ReportItem.ReportItemBuilder;
 import us.muit.fs.a4i.model.remote.GitHubEnquirer;
+import us.muit.fs.a4i.model.remote.GitHubOrganizationEnquirer;
 
 /**
  * @author Roberto Lama
@@ -35,17 +40,16 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 	 * Constructor
 	 * </p>
 	 */
-
+	
 	public GitHubOrganizationEnquirerTest() {
 		super();
 		metricNames.add("members");
 		metricNames.add("teams");
-		metricNames.add("openprojects");
-		metricNames.add("closedprojects");
+		metricNames.add("openProjects");
+		metricNames.add("closedProjects");
 		log.info("A�adidas m�tricas al GHRepositoryEnquirer");
 	}
-
-
+	
 	/**
 	 * <p>
 	 * Crea la métrica solicitada consultando la organización pasada por parámetros
@@ -56,9 +60,10 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 	 * @return La métrica creada
 	 * @throws MetricException Si la métrica no está definida se lanzará una
 	 *                         excepción
+	 * @throws ReportItemException 
 	 */
 	@Override
-	public ReportItem getMetric(String metricName, String organizationId) throws MetricException {
+	public ReportItem getMetric(String metricName, String organizationId) throws MetricException, ReportItemException {
 		/* MIT-FS 
 		Members: 30 GHOrganization remoteOrg
 		Teams: 2
@@ -90,21 +95,16 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 	}
 
 
-	private ReportItem getMembers(String organizationId) throws MetricException {
+	private ReportItem<Integer> getMembers(String organizationId) throws MetricException, ReportItemException {
 		ReportItem metric = null;
+		ReportItemBuilder members = null;
 		switch (organizationId) {
 		case "MIT-FS":
-			try {
-				ReportItemBuilder<Integer> members = new ReportItem.ReportItemBuilder<Integer>("members",
-						30);
-				members.source("GitHub, calculada")
-						.description("Obtiene el número de miembros de una organización");
-				metric = members.build();
+			members = new ReportItem.ReportItemBuilder<Integer>("members", 30);
+			members.source("GitHub, calculada")
+					.description("Obtiene el número de miembros de una organización");
+			metric = members.build();
 
-			} catch (ReportItemException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			break;
 		default:
 			throw new MetricException("La organización " + organizationId + " no está contemplada en el test, solo se contempla MIT-FS");
@@ -112,13 +112,12 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 		return metric;
 	}
 
-	private ReportItem getTeams(String organizationId) throws MetricException {
-		ReportItem metric = null;
+	private ReportItem<Integer> getTeams(String organizationId) throws MetricException {
+		ReportItem<Integer> metric = null;
 		switch (organizationId) {
 		case "MIT-FS":
 			try {
-				ReportItemBuilder<Integer> members = new ReportItem.ReportItemBuilder<Integer>("teams",
-						2);
+				ReportItemBuilder<Integer> members = new ReportItem.ReportItemBuilder<Integer>("teams", 2);
 				members.source("GitHub, calculada")
 						.description("Obtiene el número de equipos de una organización");
 				metric = members.build();
@@ -134,8 +133,8 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 		return metric;
 	}
 
-	private ReportItem getOpenProjects(String organizationId) throws MetricException {
-		ReportItem metric = null;
+	private ReportItem<Integer> getOpenProjects(String organizationId) throws MetricException {
+		ReportItem<Integer> metric = null;
 		switch (organizationId) {
 		case "MIT-FS":
 			try {
@@ -156,8 +155,9 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 		return metric;
 	}
 	
-	private ReportItem getClosedProjects(String organizationId) throws MetricException {
-		ReportItem metric = null;
+	private ReportItem<Integer> getClosedProjects(String organizationId) throws MetricException {
+		ReportItem<Integer> metric = null;
+		
 		switch (organizationId) {
 		case "MIT-FS":
 			try {
@@ -181,13 +181,14 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 	@Override
 	public ReportI buildReport(String organizationId) {
 		ReportI myRepo = null;
+		myRepo = new Report(organizationId);
 		log.info("Invocado el m�todo que construye un objeto RepositoryReport");
 		/**
 		 * <p>
 		 * Información sobre la organización obtenida de GitHub
 		 * </p>
 		 */
-		GHOrganization remoteOrg;
+		GHOrganization remoteOrg = null;
 		/**
 		 * <p>
 		 * En estos momentos cada vez que se invoca construyeObjeto se crea y rellena
@@ -202,8 +203,7 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 		try {
 			log.info("Nombre organización = " + organizationId);
 
-			ReportItemBuilder<Integer> members = new ReportItem.ReportItemBuilder<Integer>("members",
-					(Integer) getMembers(organizationId).getValue());
+			ReportItemBuilder<Integer> members = new ReportItem.ReportItemBuilder<Integer>("members",getMembers(organizationId).getValue());
 			members.source("GitHub");
 			myRepo.addMetric(members.build());
 			log.info("Añadida métrica miembros " + members);
@@ -212,8 +212,8 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 					(Integer) getTeams(organizationId).getValue());
 			teams.source("GitHub");
 			myRepo.addMetric(teams.build());
+			
 			log.info("Añadida métrica equipos " + teams);
-
 			ReportItemBuilder<Integer> openProjects = new ReportItem.ReportItemBuilder<Integer>("openProjects",
 					(Integer) getOpenProjects(organizationId).getValue());
 			openProjects.source("GitHub");
@@ -226,11 +226,36 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 			myRepo.addMetric(closedProjects.build());
 			log.info("Añadida métrica closedProjects " + closedProjects);
 
+
 		} catch (Exception e) {
 			log.severe("Problemas en la conexión " + e);
 		}
 
 		return myRepo;
+	}
+	
+	/**
+	 * Test method for
+	 * GitHubOrganizationEnquirer
+	 * @throws MetricException 
+	 * @throws ReportItemException 
+	 */
+	@Test
+	void testGetMembers() throws MetricException, ReportItemException {
+		ReportItem<Integer> members = GitHubOrganizationEnquirer.getMembers("MIT-FS");
+		ReportItem<Integer> membersMock = getMembers("MIT-FS");
+		assertEquals(members.getValue(),
+				membersMock.getValue(), "Deber�aa tener el valor especificado en el mock");
+
+		assertEquals(GitHubOrganizationEnquirer.getTeams("MIT-FS").getValue(),
+				getTeams("MIT-FS").getValue(), "Deber�aa tener el valor especificado en el mock");
+
+		assertEquals(GitHubOrganizationEnquirer.getOpenProjects("MIT-FS").getValue(),
+				getOpenProjects("MIT-FS").getValue(), "Deber�aa tener el valor especificado en el mock");
+			
+		assertEquals(GitHubOrganizationEnquirer.getClosedProjects("MIT-FS").getValue(),
+				getClosedProjects("MIT-FS").getValue(), "Deber�aa tener el valor especificado en el mock");
+
 	}
 
 }
