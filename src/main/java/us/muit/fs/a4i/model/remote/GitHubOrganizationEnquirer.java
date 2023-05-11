@@ -3,8 +3,16 @@
  */
 package us.muit.fs.a4i.model.remote;
 
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import org.kohsuke.github.GHOrganization;
+import org.kohsuke.github.GHPullRequest;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
+
+import us.muit.fs.a4i.config.MetricConfiguration;
 import us.muit.fs.a4i.exceptions.MetricException;
 import us.muit.fs.a4i.exceptions.ReportItemException;
 import us.muit.fs.a4i.model.entities.Report;
@@ -41,10 +49,61 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		return null;
 	}
 	@Override
-	public ReportItemI getMetric(String metricName, String entityId) throws MetricException {
+	public ReportItem<Integer> getMetric(String metricName, String entityId) throws MetricException {
+		System.out.println("getMetric");
 		// TODO Auto-generated method stub
-		return null;
+		ReportItem<Integer> metric = null;
+		List<GHRepository> repos = null;
+		ReportItemBuilder<Integer> reportBuilder = null;
+		Map<String, GHRepository> repos2 = null;
+		
+		try {
+			GitHub gb = getConnection();
+			GHOrganization remoteOrg = gb.getOrganization(entityId);
+			System.out.println(remoteOrg);
+			MetricConfiguration metricConfiguration = new MetricConfiguration();
+			metricConfiguration.listAllMetrics();
+			switch (metricName) {
+			case "RepositoriesWithOpenPullRequest":
+				System.out.println("RepositoriesWithOpenPullRequest");
+				repos = remoteOrg.getRepositoriesWithOpenPullRequests();
+				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("RepositoriesWithOpenPullRequest",
+						repos.size());
+				reportBuilder.source("GitHub")
+						.description("Obtiene el número de repositorios con pull request abiertos.");
+				metric = reportBuilder.build();
+				break;
+			case "Repositories":
+				System.out.println("Repositories");
+				repos2 = remoteOrg.getRepositories();
+				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("Repositories",
+						repos2.size());
+				reportBuilder.source("GitHub")
+						.description("Obtiene el número de repositorios de la organización.");
+				metric = reportBuilder.build();
+				break;
+			case "PullRequest":
+				System.out.println("PullRequest");
+				List<GHPullRequest> pull_requests = remoteOrg.getPullRequests();
+				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("PullRequest",
+						pull_requests.size());
+				reportBuilder.source("GitHub")
+						.description("Obtiene el número total de pull requests abiertos de la organización.");
+				metric = reportBuilder.build();
+				break;
+			default:
+				System.out.println("NONE");
+			}
+		}
+	    catch (Exception e) {
+	    	e.printStackTrace();
+	    	throw new MetricException(
+				"No se puede acceder al repositorio remoto " + entityId + " para recuperarlo");
+	    }
+		
+		return metric;
 	}
+	
 	public static ReportItem<Integer> getMembers(String string) throws ReportItemException {
 		ReportItemBuilder underTest = null;
 		try {
