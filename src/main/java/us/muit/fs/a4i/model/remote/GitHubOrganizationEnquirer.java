@@ -10,7 +10,11 @@ import java.util.logging.Logger;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHTeam;
+import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.PagedIterable;
+import org.kohsuke.github.GHProject;
 
 import us.muit.fs.a4i.config.MetricConfiguration;
 import us.muit.fs.a4i.exceptions.MetricException;
@@ -48,6 +52,7 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	@SuppressWarnings("deprecation")
 	@Override
 	public ReportItem<Integer> getMetric(String metricName, String entityId) throws MetricException {
 		System.out.println("getMetric");
@@ -56,11 +61,23 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		List<GHRepository> repos = null;
 		ReportItemBuilder<Integer> reportBuilder = null;
 		Map<String, GHRepository> repos2 = null;
+		PagedIterable<GHUser> members = null;
+		Map<String, GHTeam> teams = null;
+		System.out.println("????");
+		PagedIterable<GHProject> projects = null;
+		
+		
+		
 		
 		try {
 			GitHub gb = getConnection();
+			System.out.println("???? conexion");
+			System.out.println(entityId);
 			GHOrganization remoteOrg = gb.getOrganization(entityId);
 			System.out.println(remoteOrg);
+			System.out.println("???? orgNIZcion");
+			GHProject.ProjectStateFilter OPEN = null;
+			GHProject.ProjectStateFilter CLOSE = null;
 			MetricConfiguration metricConfiguration = new MetricConfiguration();
 			metricConfiguration.listAllMetrics();
 			switch (metricName) {
@@ -91,6 +108,48 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 						.description("Obtiene el número total de pull requests abiertos de la organización.");
 				metric = reportBuilder.build();
 				break;
+			case "Members":
+				System.out.println("Members");
+				members = remoteOrg.listMembers();
+				
+				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("members",
+					members.toList().size());
+				reportBuilder.source("GitHub")
+						.description("Obtiene el número total de miembros de la organización.");
+				metric = reportBuilder.build();
+				break;
+			case "Teams":
+				System.out.println("Teams");
+				teams = remoteOrg.getTeams();
+				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("teams",
+						teams.size());
+				reportBuilder.source("GitHub")
+						.description("Obtiene el número total de equipos de la organización.");
+				metric = reportBuilder.build();
+				break;
+			case "OpenProjects":
+				System.out.println("OpenProjects");
+				projects = remoteOrg.listProjects(OPEN);
+			
+				System.out.println(projects);
+				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("openProjects",
+						projects.toList().size());
+				reportBuilder.source("GitHub")
+						.description("Obtiene el número total de projectos abiertos.");
+				metric = reportBuilder.build();
+				break;
+			case "ClosedProjects":
+				System.out.println("ClosedProjects");
+				projects = remoteOrg.listProjects(CLOSE);
+			
+				System.out.println(projects);
+				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("closedProjects",
+						projects.toList().size());
+				reportBuilder.source("GitHub")
+						.description("Obtiene el número total de projectos cerrados.");
+				metric = reportBuilder.build();
+				break;
+				
 			default:
 				System.out.println("NONE");
 			}
