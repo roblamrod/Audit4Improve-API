@@ -1,8 +1,8 @@
 name: Flujo de trabajo para ejecutar los test
 on:
   workflow_dispatch:
-  added_to_project:
-    types: [moved_columns_in_project]
+  issues:
+    types: [opened, edited, milestoned]
   push:
     branches: [ V.0.2 ]
   pull_request:
