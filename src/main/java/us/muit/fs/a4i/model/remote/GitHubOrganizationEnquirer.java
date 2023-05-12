@@ -62,7 +62,8 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		List<GHRepository> repos = null;
 		ReportItemBuilder<Integer> reportBuilder = null;
 		Map<String, GHRepository> repos2 = null;
-		PagedIterable<GHUser> members = null;
+		//PagedIterable<GHUser> members = null;
+		List<GHUser> members = null;
 		Map<String, GHTeam> teams = null;
 		//PagedIterable<GHTeam> teams = null;
 		System.out.println("????");
@@ -112,15 +113,15 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				break;
 			case "Members":
 				System.out.println("Members");
-				members = remoteOrg.listMembers();
-				System.out.println(members.toList().size());
+				members = remoteOrg.getMembers();
+				System.out.println(members.size());
 				
-				for (Object i: members) {
+				/*for (Object i: members) {
 					num_members++;
 					System.out.println(i);
-				}
+				}*/
 				
-				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("members", num_members);
+				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("members", members.size());
 				reportBuilder.source("GitHub")
 						.description("Obtiene el número total de miembros de la organización.");
 				metric = reportBuilder.build();
@@ -135,7 +136,7 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 						.description("Obtiene el número total de equipos de la organización.");
 				metric = reportBuilder.build();
 				break;
-			case "openProjects":
+			case "OpenProjects":
 				System.out.println("OpenProjects");
 				projects = remoteOrg.listProjects(OPEN);
 			
