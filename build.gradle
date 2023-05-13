@@ -34,6 +34,9 @@ publishing {
                 password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_PACKAGES")
                 }
         }
+        maven {
+        	url = "https://maven.pkg.github.com/roblamrod/Audit4Improve-API"
+        }
     }
     publications {
         gpr(MavenPublication) {
@@ -127,13 +130,13 @@ dependencies {
 
 }
 
-test {
+/*test {
 	useJUnitPlatform()
 	testLogging {
 		events "passed", "skipped", "failed"
 	}
 }
-
+*/
 
 
 

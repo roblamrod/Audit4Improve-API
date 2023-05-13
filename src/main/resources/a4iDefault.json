@@ -42,16 +42,16 @@
 			"unit": "date"
 		},
 		{
-			"name": "members",
+			"name": "Members",
 			"type": "java.lang.Integer",
 			"description": "Número de miembros, members en la organización",
-			"unit": "members"
+			"unit": "Members"
 		},
 		{
-			"name": "teams",
+			"name": "Teams",
 			"type": "java.lang.Integer",
 			"description": "Número de equipos, teams en la organización",
-			"unit": "teams"
+			"unit": "Teams"
 		},
 		{
 			"name": "openProjects",

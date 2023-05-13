@@ -3,6 +3,7 @@
  */
 package us.muit.fs.a4i.model.remote;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -61,11 +62,13 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		List<GHRepository> repos = null;
 		ReportItemBuilder<Integer> reportBuilder = null;
 		Map<String, GHRepository> repos2 = null;
-		PagedIterable<GHUser> members = null;
+		//PagedIterable<GHUser> members = null;
+		List<GHUser> members = null;
 		Map<String, GHTeam> teams = null;
+		//PagedIterable<GHTeam> teams = null;
 		System.out.println("????");
 		PagedIterable<GHProject> projects = null;
-		
+		Integer num_members = 0;
 		
 		
 		
@@ -110,19 +113,25 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				break;
 			case "Members":
 				System.out.println("Members");
-				members = remoteOrg.listMembers();
+				members = remoteOrg.getMembers();
+				System.out.println(members.size());
 				
-				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("members",
-					members.toList().size());
+				/*for (Object i: members) {
+					num_members++;
+					System.out.println(i);
+				}*/
+				
+				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("members", members.size());
 				reportBuilder.source("GitHub")
 						.description("Obtiene el número total de miembros de la organización.");
 				metric = reportBuilder.build();
 				break;
 			case "Teams":
 				System.out.println("Teams");
-				teams = remoteOrg.getTeams();
+				teams = remoteOrg.getTeams();//.listTeams();//.getTeams();
+				System.out.println(teams.keySet().size()); //.toList().size());
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("teams",
-						teams.size());
+						teams.keySet().size());//teams.toList().size());
 				reportBuilder.source("GitHub")
 						.description("Obtiene el número total de equipos de la organización.");
 				metric = reportBuilder.build();
