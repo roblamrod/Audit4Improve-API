@@ -300,7 +300,7 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 	void testGetTeams() throws MetricException, ReportItemException {
 		GitHubOrganizationEnquirer ghEnquirer = new GitHubOrganizationEnquirer();
 		// TEST 5: Teams
-		ReportItem<Integer> metricsTeams = ghEnquirer.getMetric("Teams", "MIT-FS/Audit4Improve-API");
+		ReportItem<Integer> metricsTeams = ghEnquirer.getMetric("Teams", "MIT-FS");
 		System.out.println(metricsTeams.getValue());
 		assertEquals(metricsTeams.getValue(),
 				2, "Debería tener el valor especificado en el mock"); // Tiene 2 teams
