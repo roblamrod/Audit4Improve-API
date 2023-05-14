@@ -15,6 +15,9 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHRepositoryStatistics;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GHRepositoryStatistics.CodeFrequency;
+import org.kohsuke.github.GHProject;
+
+
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHOrganization;
 
@@ -75,7 +78,7 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 			throw new MetricException("Intenta obtener una métrica sin haber obtenido los datos de la organización");
 		}
 		switch (metricName) {
-		case "Mssembers":
+		case "Members":
 			metric = getMembers(organizationId);
 			break;
 		case "Teams":
@@ -282,7 +285,7 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 	ReportItem<Integer> metricsMembers = ghEnquirer.getMetric("Members", "MIT-FS");
 	System.out.println(metricsMembers.getValue());
 	assertEquals(metricsMembers.getValue(),
-			30, "Debería tener el valor especificado en el mock"); // Tiene 4 repositorios con pull requests abiertos
+			30, "Debería tener el valor especificado en el mock"); // Tiene 30 miembros
 	
 	}
 	
@@ -300,7 +303,7 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 		ReportItem<Integer> metricsTeams = ghEnquirer.getMetric("Teams", "MIT-FS/Audit4Improve-API");
 		System.out.println(metricsTeams.getValue());
 		assertEquals(metricsTeams.getValue(),
-				2, "Debería tener el valor especificado en el mock"); // Tiene 15 pull requests
+				2, "Debería tener el valor especificado en el mock"); // Tiene 2 teams
 	}
 	
 	/**
@@ -316,7 +319,7 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 		ReportItem<Integer> metricsOpenProjects = ghEnquirer.getMetric("OpenProjects", "MIT-FS");
 		System.out.println(metricsOpenProjects.getValue());
 		assertEquals(metricsOpenProjects.getValue(),
-				1, "Debería tener el valor especificado en el mock"); // Tiene 10 repositorios
+				0, "Debería tener el valor especificado en el mock"); // Tiene 0 proyectos abiertos (classic)
 	}
 	
 	/**
@@ -332,7 +335,7 @@ public class GitHubOrganizationEnquirerTest extends GitHubEnquirer {
 		ReportItem<Integer> metricsClosedProjects = ghEnquirer.getMetric("ClosedProjects", "MIT-FS");
 		System.out.println(metricsClosedProjects.getValue());
 		assertEquals(metricsClosedProjects.getValue(),
-				10, "Debería tener el valor especificado en el mock"); // Tiene 10 repositorios
+				2, "Debería tener el valor especificado en el mock"); // Tiene 2 proyectos cerrados (classic)
 	}
 	
 	/**
