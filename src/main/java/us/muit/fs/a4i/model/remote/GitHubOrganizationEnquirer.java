@@ -17,6 +17,8 @@ import org.kohsuke.github.GitHub;
 import org.kohsuke.github.PagedIterable;
 import org.kohsuke.github.GHProject;
 
+
+
 import us.muit.fs.a4i.config.MetricConfiguration;
 import us.muit.fs.a4i.exceptions.MetricException;
 import us.muit.fs.a4i.exceptions.ReportItemException;
@@ -62,12 +64,14 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		List<GHRepository> repos = null;
 		ReportItemBuilder<Integer> reportBuilder = null;
 		Map<String, GHRepository> repos2 = null;
-		//PagedIterable<GHUser> members = null;
 		List<GHUser> members = null;
-		Map<String, GHTeam> teams = null;
+		List<GHTeam> teams = null;
 		//PagedIterable<GHTeam> teams = null;
 		System.out.println("????");
-		PagedIterable<GHProject> projects = null;
+		PagedIterable<GHProject> projectsIterableOpen = null;
+		List<GHProject> projectsOpen = null;
+		PagedIterable<GHProject> projectsIterableClosed = null;
+		List<GHProject> projectsClosed = null;
 		Integer num_members = 0;
 		
 		
@@ -79,8 +83,6 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 			GHOrganization remoteOrg = gb.getOrganization(entityId);
 			System.out.println(remoteOrg);
 			System.out.println("???? orgNIZcion");
-			GHProject.ProjectStateFilter OPEN = null;
-			GHProject.ProjectStateFilter CLOSE = null;
 			MetricConfiguration metricConfiguration = new MetricConfiguration();
 			metricConfiguration.listAllMetrics();
 			switch (metricName) {
@@ -113,7 +115,7 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				break;
 			case "Members":
 				System.out.println("Members");
-				members = remoteOrg.getMembers();
+				members = remoteOrg.listMembers().toList();
 				System.out.println(members.size());
 				
 				/*for (Object i: members) {
@@ -128,32 +130,33 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				break;
 			case "Teams":
 				System.out.println("Teams");
-				teams = remoteOrg.getTeams();//.listTeams();//.getTeams();
-				System.out.println(teams.keySet().size()); //.toList().size());
+				teams = remoteOrg.listTeams().toList();//.listTeams();//.getTeams();
+				System.out.println(teams.size()); //.toList().size());
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("teams",
-						teams.keySet().size());//teams.toList().size());
+						teams.size());//teams.toList().size());
 				reportBuilder.source("GitHub")
 						.description("Obtiene el número total de equipos de la organización.");
 				metric = reportBuilder.build();
 				break;
 			case "OpenProjects":
 				System.out.println("OpenProjects");
-				projects = remoteOrg.listProjects(OPEN);
-			
-				System.out.println(projects);
+				projectsIterableOpen = remoteOrg.listProjects(GHProject.ProjectStateFilter.OPEN);
+				projectsOpen = projectsIterableOpen.toList();
+				System.out.println(projectsOpen);
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("openProjects",
-						projects.toList().size());
+						projectsOpen.size());
 				reportBuilder.source("GitHub")
 						.description("Obtiene el número total de projectos abiertos.");
 				metric = reportBuilder.build();
 				break;
 			case "ClosedProjects":
 				System.out.println("ClosedProjects");
-				projects = remoteOrg.listProjects(CLOSE);
+				projectsIterableClosed = remoteOrg.listProjects(GHProject.ProjectStateFilter.CLOSED);
+				projectsClosed = projectsIterableClosed.toList();
 			
-				System.out.println(projects);
+				System.out.println(projectsClosed);
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("closedProjects",
-						projects.toList().size());
+						projectsClosed.size());
 				reportBuilder.source("GitHub")
 						.description("Obtiene el número total de projectos cerrados.");
 				metric = reportBuilder.build();
@@ -197,7 +200,7 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		ReportItem<Integer> metric = null;
 		ReportItemBuilder<Integer> members = new ReportItem.ReportItemBuilder<Integer>("openProjects",1);
 		members.source("GitHub, calculada")
-				.description("Obtiene el número de equipos de una organización");
+				.description("Obtiene el proyectoz abiertos (classic) de una organización");
 		metric = members.build();
 		return metric;
 	}
@@ -206,7 +209,7 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		ReportItem<Integer> metric = null;
 		ReportItemBuilder<Integer> members = new ReportItem.ReportItemBuilder<Integer>("closedProjects",0);
 		members.source("GitHub, calculada")
-				.description("Obtiene el número de equipos de una organización");
+				.description("Obtiene el número de proyectos cerrados (classic) de una organización");
 		metric = members.build();
 		return metric;
 	}
