@@ -58,7 +58,7 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 	@SuppressWarnings("deprecation")
 	@Override
 	public ReportItem<Integer> getMetric(String metricName, String entityId) throws MetricException {
-		System.out.println("getMetric");
+		log.info("getMetric");
 		// TODO Auto-generated method stub
 		ReportItem<Integer> metric = null;
 		List<GHRepository> repos = null;
@@ -67,7 +67,7 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		List<GHUser> members = null;
 		List<GHTeam> teams = null;
 		//PagedIterable<GHTeam> teams = null;
-		System.out.println("????");
+		log.info("????");
 		PagedIterable<GHProject> projectsIterableOpen = null;
 		List<GHProject> projectsOpen = null;
 		PagedIterable<GHProject> projectsIterableClosed = null;
@@ -78,16 +78,16 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		
 		try {
 			GitHub gb = getConnection();
-			System.out.println("???? conexion");
-			System.out.println(entityId);
+			log.info("???? conexion");
+			log.info(entityId);
 			GHOrganization remoteOrg = gb.getOrganization(entityId);
-			System.out.println(remoteOrg);
-			System.out.println("???? orgNIZcion");
+			log.info(remoteOrg.getName());
+			log.info("???? orgNIZcion");
 			MetricConfiguration metricConfiguration = new MetricConfiguration();
 			metricConfiguration.listAllMetrics();
 			switch (metricName) {
 			case "RepositoriesWithOpenPullRequest":
-				System.out.println("RepositoriesWithOpenPullRequest");
+				log.info("RepositoriesWithOpenPullRequest");
 				repos = remoteOrg.getRepositoriesWithOpenPullRequests();
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("RepositoriesWithOpenPullRequest",
 						repos.size());
@@ -96,7 +96,7 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				metric = reportBuilder.build();
 				break;
 			case "Repositories":
-				System.out.println("Repositories");
+				log.info("Repositories");
 				repos2 = remoteOrg.getRepositories();
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("Repositories",
 						repos2.size());
@@ -105,7 +105,7 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				metric = reportBuilder.build();
 				break;
 			case "PullRequest":
-				System.out.println("PullRequest");
+				log.info("PullRequest");
 				List<GHPullRequest> pull_requests = remoteOrg.getPullRequests();
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("PullRequest",
 						pull_requests.size());
@@ -114,13 +114,13 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				metric = reportBuilder.build();
 				break;
 			case "Members":
-				System.out.println("Members");
+				log.info("Members");
 				members = remoteOrg.listMembers().toList();
-				System.out.println(members.size());
+				log.info(String(members.size()));
 				
 				/*for (Object i: members) {
 					num_members++;
-					System.out.println(i);
+					log.info(i);
 				}*/
 				
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("members", members.size());
@@ -129,9 +129,9 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				metric = reportBuilder.build();
 				break;
 			case "Teams":
-				System.out.println("Teams");
+				log.info("Teams");
 				teams = remoteOrg.listTeams().toList();//.listTeams();//.getTeams();
-				System.out.println(teams.size()); //.toList().size());
+				log.info(String(teams.size())); //.toList().size());
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("teams",
 						teams.size());//teams.toList().size());
 				reportBuilder.source("GitHub")
@@ -139,10 +139,10 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				metric = reportBuilder.build();
 				break;
 			case "OpenProjects":
-				System.out.println("OpenProjects");
+				log.info("OpenProjects");
 				projectsIterableOpen = remoteOrg.listProjects(GHProject.ProjectStateFilter.OPEN);
 				projectsOpen = projectsIterableOpen.toList();
-				System.out.println(projectsOpen);
+				log.info(projectsOpen.toString());
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("openProjects",
 						projectsOpen.size());
 				reportBuilder.source("GitHub")
@@ -150,11 +150,11 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				metric = reportBuilder.build();
 				break;
 			case "ClosedProjects":
-				System.out.println("ClosedProjects");
+				log.info("ClosedProjects");
 				projectsIterableClosed = remoteOrg.listProjects(GHProject.ProjectStateFilter.CLOSED);
 				projectsClosed = projectsIterableClosed.toList();
 			
-				System.out.println(projectsClosed);
+				log.info(projectsClosed.toString());
 				reportBuilder = new ReportItem.ReportItemBuilder<Integer>("closedProjects",
 						projectsClosed.size());
 				reportBuilder.source("GitHub")
@@ -163,7 +163,7 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 				break;
 				
 			default:
-				System.out.println("NONE");
+				log.info("NONE");
 			}
 		}
 	    catch (Exception e) {
@@ -174,44 +174,8 @@ public class GitHubOrganizationEnquirer extends GitHubEnquirer {
 		
 		return metric;
 	}
-	
-	public static ReportItem<Integer> getMembers(String string) throws ReportItemException {
-		ReportItemBuilder underTest = null;
-		try {
-			underTest = new ReportItemBuilder<Integer>("members", 30);
-		} catch (ReportItemException e) {
-			log.info("Watchers existe y no deber�a haber saltado esta excepci�n");
-			e.printStackTrace();
-		}
-		ReportItem newMetric = underTest.build();
-		return newMetric;
+	private String String(int size) {
+		// TODO Auto-generated method stub
+		return null;
 	}
-	
-	public static ReportItem<Integer> getTeams(String string) throws ReportItemException {
-		ReportItem<Integer> metric = null;
-		ReportItemBuilder<Integer> members = new ReportItem.ReportItemBuilder<Integer>("teams",2);
-		members.source("GitHub, calculada")
-				.description("Obtiene el número de equipos de una organización");
-		metric = members.build();
-		return metric;
-	}
-
-	public static ReportItem<Integer> getOpenProjects(String string) throws ReportItemException {
-		ReportItem<Integer> metric = null;
-		ReportItemBuilder<Integer> members = new ReportItem.ReportItemBuilder<Integer>("openProjects",1);
-		members.source("GitHub, calculada")
-				.description("Obtiene el proyectoz abiertos (classic) de una organización");
-		metric = members.build();
-		return metric;
-	}
-
-	public static ReportItem<Integer> getClosedProjects(String string) throws ReportItemException {
-		ReportItem<Integer> metric = null;
-		ReportItemBuilder<Integer> members = new ReportItem.ReportItemBuilder<Integer>("closedProjects",0);
-		members.source("GitHub, calculada")
-				.description("Obtiene el número de proyectos cerrados (classic) de una organización");
-		metric = members.build();
-		return metric;
-	}
-	
 }
